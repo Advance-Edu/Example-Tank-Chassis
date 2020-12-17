@@ -62,22 +62,31 @@ void Robot::AutonomousPeriodic() {
 
 void Robot::TeleopInit() {}
 
+/**
+ * TeleopPeriodic is executed repeatedly during the Teleop Mode
+ * 机器人手动操作模式下会反复调用 TeleopPeriodic 方法
+ */
 void Robot::TeleopPeriodic() {
-  double y = -stick_0.GetY(frc::GenericHID::kLeftHand);
-  double z = stick_0.GetX(frc::GenericHID::kRightHand);
+  /* Get Xbox axis value | 读取手柄摇杆的数值 */
+  double y = -stick_0.GetY(frc::GenericHID::kLeftHand);     // y need to be inverted so that front is +1
+  double z = stick_0.GetX(frc::GenericHID::kRightHand);     // z is for rotation
 
+  /* multiply by a factor to decrease speed */
   y *= 0.2;
   z *= 0.2;
-
+  
+  /* calculate the expected output value for each side of the motor | 计算每侧电机输出值 */
   double left_motor_output = y + z;
   double right_motor_output = -y + z;
 
+  /* clamp the output value in range [-1, 1] | 将输出值限制在 [-1, 1] 的范围内 */
   left_motor_output = left_motor_output > 1 ? 1 : left_motor_output;
   left_motor_output = left_motor_output < -1 ? -1 : left_motor_output;
   
   right_motor_output = right_motor_output > 1 ? 1 : right_motor_output;
   right_motor_output = right_motor_output < -1 ? -1 : right_motor_output;
 
+  /* set motor output | 将数值传给电机控制器 */
   m_left_0.Set(left_motor_output);
   m_right_0.Set(right_motor_output);
 }

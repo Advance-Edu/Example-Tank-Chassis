@@ -34,8 +34,10 @@ class Robot : public frc::TimedRobot {
   const std::string kAutoNameCustom = "My Auto";
   std::string m_autoSelected;
   
+  /* Initialize XboxController object | 初始化 Xbox 手柄 */
   frc::XboxController stick_0{0};
 
+  /* Initialize the motor controller object | 初始化底盘电机控制器 */
   frc::PWMVictorSPX m_left_0{0};
   frc::PWMVictorSPX m_right_0{1};
 };
