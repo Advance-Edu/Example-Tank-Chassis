@@ -10,6 +10,9 @@
 #include <string>
 
 #include <frc/TimedRobot.h>
+#include <frc/PWMVictorSPX.h>
+#include <frc/XboxController.h>
+#include <frc/GenericHID.h>
 #include <frc/smartdashboard/SendableChooser.h>
 
 class Robot : public frc::TimedRobot {
@@ -30,4 +33,9 @@ class Robot : public frc::TimedRobot {
   const std::string kAutoNameDefault = "Default";
   const std::string kAutoNameCustom = "My Auto";
   std::string m_autoSelected;
+  
+  frc::XboxController stick_0{0};
+
+  frc::PWMVictorSPX m_left_0{0};
+  frc::PWMVictorSPX m_right_0{1};
 };

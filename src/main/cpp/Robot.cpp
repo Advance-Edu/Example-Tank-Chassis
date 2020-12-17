@@ -11,6 +11,7 @@
 
 #include <frc/smartdashboard/SmartDashboard.h>
 
+
 void Robot::RobotInit() {
   m_chooser.SetDefaultOption(kAutoNameDefault, kAutoNameDefault);
   m_chooser.AddOption(kAutoNameCustom, kAutoNameCustom);
@@ -61,7 +62,25 @@ void Robot::AutonomousPeriodic() {
 
 void Robot::TeleopInit() {}
 
-void Robot::TeleopPeriodic() {}
+void Robot::TeleopPeriodic() {
+  double y = -stick_0.GetY(frc::GenericHID::kLeftHand);
+  double z = stick_0.GetX(frc::GenericHID::kRightHand);
+
+  y *= 0.2;
+  z *= 0.2;
+
+  double left_motor_output = y + z;
+  double right_motor_output = -y + z;
+
+  left_motor_output = left_motor_output > 1 ? 1 : left_motor_output;
+  left_motor_output = left_motor_output < -1 ? -1 : left_motor_output;
+  
+  right_motor_output = right_motor_output > 1 ? 1 : right_motor_output;
+  right_motor_output = right_motor_output < -1 ? -1 : right_motor_output;
+
+  m_left_0.Set(left_motor_output);
+  m_right_0.Set(right_motor_output);
+}
 
 void Robot::DisabledInit() {}
 
