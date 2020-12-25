@@ -11,11 +11,18 @@
 
 #include <frc/smartdashboard/SmartDashboard.h>
 
+#define USE_GAME_SINGLE_STICK_DRIVE_MODE
+
 
 void Robot::RobotInit() {
   m_chooser.SetDefaultOption(kAutoNameDefault, kAutoNameDefault);
   m_chooser.AddOption(kAutoNameCustom, kAutoNameCustom);
   frc::SmartDashboard::PutData("Auto Modes", &m_chooser);
+
+  motor_left_0.SetInverted(false);
+  motor_left_1.SetInverted(false);
+  motor_right_0.SetInverted(true);
+  motor_right_1.SetInverted(true);
 }
 
 /**
@@ -62,33 +69,76 @@ void Robot::AutonomousPeriodic() {
 
 void Robot::TeleopInit() {}
 
-/**
- * TeleopPeriodic is executed repeatedly during the Teleop Mode
- * 机器人手动操作模式下会反复调用 TeleopPeriodic 方法
- */
 void Robot::TeleopPeriodic() {
-  /* Get Xbox axis value | 读取手柄摇杆的数值 */
-  double y = -stick_0.GetY(frc::GenericHID::kLeftHand);     // y need to be inverted so that front is +1
-  double z = stick_0.GetX(frc::GenericHID::kRightHand);     // z is for rotation
+  #ifdef USE_TRADITIONAL_TANK_DRIVE_MODE
+  /* traditional Tank drive */
+  double y_left = -stick_0.GetY(frc::GenericHID::kLeftHand);
+  double y_right = -stick_0.GetY(frc::GenericHID::kRightHand);
 
-  /* multiply by a factor to decrease speed */
-  y *= 0.2;
-  z *= 0.2;
-  
-  /* calculate the expected output value for each side of the motor | 计算每侧电机输出值 */
+  y_left *= 0.5;
+  y_right *= 0.5;
+
+  double left_motor_output = y_left;
+  double right_motor_output = y_right;
+  #endif    // USE_TRADITIONAL_TANK_DRIVE_MODE
+
+  #ifdef USE_RC_DRIVE_MODE
+  double y = -stick_0.GetY(frc::GenericHID::kLeftHand);
+  double z = stick_0.GetX(frc::GenericHID::kRightHand);
+
+  z *= 0.5;
+
   double left_motor_output = y + z;
-  double right_motor_output = -y + z;
-
-  /* clamp the output value in range [-1, 1] | 将输出值限制在 [-1, 1] 的范围内 */
-  left_motor_output = left_motor_output > 1 ? 1 : left_motor_output;
-  left_motor_output = left_motor_output < -1 ? -1 : left_motor_output;
+  double right_motor_output = y - z;
+  #endif    // USE_RC_DRIVE_MODE
   
-  right_motor_output = right_motor_output > 1 ? 1 : right_motor_output;
-  right_motor_output = right_motor_output < -1 ? -1 : right_motor_output;
+  #ifdef USE_INVERSE_RC_DRIVE_MODE
+  double y = -stick_0.GetY(frc::GenericHID::kRightHand);
+  double z = stick_0.GetX(frc::GenericHID::kLeftHand);
 
-  /* set motor output | 将数值传给电机控制器 */
-  m_left_0.Set(left_motor_output);
-  m_right_0.Set(right_motor_output);
+  z *= 0.5;
+
+  double left_motor_output = y + z;
+  double right_motor_output = y - z;
+  #endif    // USE_INVERSE_RC_DRIVE_MODE
+
+  #ifdef USE_SINGLE_STICK_DRIVE_MODE
+  double y = -stick_0.GetY(frc::GenericHID::kLeftHand);
+  double z = stick_0.GetX(frc::GenericHID::kLeftHand);
+
+  z *= 0.5;
+
+  double left_motor_output = y + z;
+  double right_motor_output = y - z;
+  #endif    // USE_SINGLE_STICK_DRIVE_MODE
+
+  #ifdef USE_GAME_SINGLE_STICK_DRIVE_MODE
+  double y = -stick_0.GetY(frc::GenericHID::kLeftHand);
+  double z = stick_0.GetX(frc::GenericHID::kLeftHand);
+
+  z *= 0.5;
+  if (y < 0) {
+    z *= -1;
+  }
+
+  double left_motor_output = y + z;
+  double right_motor_output = y - z;
+  #endif    // USE_GAME_SINGLE_STICK_DRIVE_MODE
+
+  #ifdef USE_YHC_DRIVE_MODE
+  double y = -stick_0.GetY(frc::GenericHID::kLeftHand);
+  double z = -stick_0.GetTriggerAxis(frc::GenericHID::kLeftHand) + stick_0.GetTriggerAxis(frc::GenericHID::kRightHand);
+
+  z *= 0.5;
+
+  double left_motor_output = y + z;
+  double right_motor_output = y - z;
+  #endif    // USE_YHC_DRIVE_MODE
+  
+  motor_left_0.Set(left_motor_output);
+  motor_left_1.Set(left_motor_output);
+  motor_right_0.Set(right_motor_output);
+  motor_right_1.Set(right_motor_output);
 }
 
 void Robot::DisabledInit() {}
